@@ -207,7 +207,7 @@ fi
 print_status "Instalando Diodon..."
 
 if ! package_installed diodon; then
-sudo apt install -y diodon
+    sudo apt install -y diodon
 fi
 
 print_success "Diodon instalado"
@@ -220,30 +220,34 @@ print_status "Configurando tema do GNOME Terminal..."
 
 if command_exists gsettings && command_exists dconf; then
 
-PROFILE=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d \')
+PROFILE=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
 BASE="/org/gnome/terminal/legacy/profiles:/:$PROFILE/"
 
 dconf write ${BASE}use-theme-colors false
-dconf write ${BASE}background-color "'#1e1e2e'"
-dconf write ${BASE}foreground-color "'#cdd6f4'"
+dconf write ${BASE}background-color "'#1E1E1E'"
+dconf write ${BASE}foreground-color "'#D4D4D4'"
+dconf write ${BASE}bold-color "'#FFFFFF'"
+dconf write ${BASE}cursor-colors-set true
+dconf write ${BASE}cursor-background-color "'#AEAFAD'"
+dconf write ${BASE}cursor-foreground-color "'#1E1E1E'"
 
 dconf write ${BASE}palette "[
-'#45475a',
-'#f38ba8',
-'#a6e3a1',
-'#f9e2af',
-'#89b4fa',
-'#f5c2e7',
-'#94e2d5',
-'#bac2de',
-'#585b70',
-'#f38ba8',
-'#a6e3a1',
-'#f9e2af',
-'#89b4fa',
-'#f5c2e7',
-'#94e2d5',
-'#a6adc8'
+'#1E1E1E',
+'#F44747',
+'#6A9955',
+'#CE9178',
+'#569CD6',
+'#C586C0',
+'#4EC9B0',
+'#D4D4D4',
+'#808080',
+'#F44747',
+'#6A9955',
+'#DCDCAA',
+'#569CD6',
+'#C586C0',
+'#4EC9B0',
+'#FFFFFF'
 ]"
 
 print_success "Tema do terminal configurado!"
