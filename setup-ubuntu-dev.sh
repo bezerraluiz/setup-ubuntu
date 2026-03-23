@@ -3,32 +3,6 @@
 set -e
 
 # =========================================================
-# CORES PARA OUTPUT
-# =========================================================
-
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-print_status() {
-    echo -e "${BLUE}🔧 $1${NC}"
-}
-
-print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
-}
-
-print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
-}
-
-print_error() {
-    echo -e "${RED}❌ $1${NC}"
-}
-
-# =========================================================
 # HELPERS
 # =========================================================
 
@@ -211,50 +185,6 @@ if ! package_installed diodon; then
 fi
 
 print_success "Diodon instalado"
-
-# =========================================================
-# 9 — CUSTOMIZAÇÃO DO GNOME TERMINAL
-# =========================================================
-
-print_status "Configurando tema do GNOME Terminal..."
-
-if command_exists gsettings && command_exists dconf; then
-
-PROFILE=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
-BASE="/org/gnome/terminal/legacy/profiles:/:$PROFILE/"
-
-dconf write ${BASE}use-theme-colors false
-dconf write ${BASE}background-color "'#1E1E1E'"
-dconf write ${BASE}foreground-color "'#D4D4D4'"
-dconf write ${BASE}bold-color "'#FFFFFF'"
-dconf write ${BASE}cursor-colors-set true
-dconf write ${BASE}cursor-background-color "'#AEAFAD'"
-dconf write ${BASE}cursor-foreground-color "'#1E1E1E'"
-
-dconf write ${BASE}palette "[
-'#1E1E1E',
-'#F44747',
-'#6A9955',
-'#CE9178',
-'#569CD6',
-'#C586C0',
-'#4EC9B0',
-'#D4D4D4',
-'#808080',
-'#F44747',
-'#6A9955',
-'#DCDCAA',
-'#569CD6',
-'#C586C0',
-'#4EC9B0',
-'#FFFFFF'
-]"
-
-print_success "Tema do terminal configurado!"
-
-else
-
-print_warning "GNOME Terminal não detectado. Tema não aplicado."
 
 fi
 
