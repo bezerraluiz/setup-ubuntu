@@ -6,6 +6,18 @@ set -e
 # HELPERS
 # =========================================================
 
+print_status() {
+    echo "[...] $1"
+}
+
+print_success() {
+    echo "[OK] $1"
+}
+
+print_warning() {
+    echo "[WARN] $1"
+}
+
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
@@ -85,7 +97,7 @@ print_success "ZSH pronto"
 
 print_status "Instalando plugins ZSH..."
 
-ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
+ZSH_CUSTOM=${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}
 
 git clone https://github.com/zsh-users/zsh-autosuggestions \
 $ZSH_CUSTOM/plugins/zsh-autosuggestions || true
@@ -104,9 +116,13 @@ sudo apt install -y autojump
 # atualizar plugins no zshrc
 if [ -f "$HOME/.zshrc" ]; then
 
-cp "$HOME/.zshrc" "$HOME/.zshrc.bak"
+    cp "$HOME/.zshrc" "$HOME/.zshrc.bak"
 
-sed -i 's/^plugins=.*/plugins=(git zsh-autosuggestions zsh-completions autojump zsh-history-substring-search zsh-syntax-highlighting)/' "$HOME/.zshrc"
+    if grep -q "^plugins=" "$HOME/.zshrc"; then
+        sed -i 's/^plugins=.*/plugins=(git zsh-autosuggestions zsh-completions autojump zsh-history-substring-search zsh-syntax-highlighting)/' "$HOME/.zshrc"
+    else
+        echo 'plugins=(git zsh-autosuggestions zsh-completions autojump zsh-history-substring-search zsh-syntax-highlighting)' >> "$HOME/.zshrc"
+    fi
 
 fi
 
@@ -120,38 +136,37 @@ print_status "Instalando Docker..."
 
 if ! command_exists docker; then
 
-sudo install -m 0755 -d /etc/apt/keyrings
+    sudo install -m 0755 -d /etc/apt/keyrings
 
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-| sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+    | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
+    sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
-echo \
-"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-$(lsb_release -cs) stable" \
-| sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) stable" \
+    | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-sudo apt update
+    sudo apt update
 
-sudo apt install -y \
-docker-ce \
-docker-ce-cli \
-containerd.io \
-docker-buildx-plugin \
-docker-compose-plugin
+    sudo apt install -y \
+    docker-ce \
+    docker-ce-cli \
+    containerd.io \
+    docker-buildx-plugin \
+    docker-compose-plugin
 
-sudo systemctl enable docker
-sudo systemctl start docker
+    sudo systemctl enable docker
+    sudo systemctl start docker
 
-sudo usermod -aG docker $USER
+    sudo usermod -aG docker $USER
 
-print_success "Docker instalado"
+    print_success "Docker instalado"
+    print_warning "Reinicie a sessão para usar Docker sem sudo"
 
 else
-
-print_success "Docker já instalado"
-
+    print_success "Docker já instalado"
 fi
 
 # =========================================================
@@ -162,16 +177,14 @@ print_status "Instalando Node.js LTS..."
 
 if ! command_exists node; then
 
-curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 
-sudo apt install -y nodejs
+    sudo apt install -y nodejs
 
-print_success "Node.js LTS instalado"
+    print_success "Node.js LTS instalado"
 
 else
-
-print_success "Node já instalado"
-
+    print_success "Node já instalado"
 fi
 
 # =========================================================
@@ -186,8 +199,6 @@ fi
 
 print_success "Diodon instalado"
 
-fi
-
 # =========================================================
 # FINALIZAÇÃO
 # =========================================================
@@ -198,8 +209,8 @@ echo "Ambiente configurado."
 echo ""
 echo "Versões instaladas:"
 
-git --version
-node --version
-npm --version
-docker --version
-zsh --version
+git --version || true
+node --version || true
+npm --version || true
+docker --version || true
+zsh --version || true
