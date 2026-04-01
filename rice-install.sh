@@ -14,6 +14,7 @@
 # ║   • Fastfetch + ASCII art                                    ║
 # ║   • Plymouth: tema Catppuccin boot                           ║
 # ║   • GRUB: tema Catppuccin                                    ║
+# ║   • clear → volta ao fastfetch                               ║
 # ║   • Aplicar temas via gsettings                              ║
 # ║                                                              ║
 # ║   Uso: bash rice-install.sh                                  ║
@@ -346,11 +347,25 @@ with open(config_path, "w") as f:
 print("  ✓  Fastfetch configurado")
 PYEOF
 
-# Adiciona fastfetch ao .bashrc
+# Adiciona fastfetch + clear override ao .bashrc
 if ! grep -q 'fastfetch' "$HOME/.bashrc"; then
     echo 'fastfetch' >> "$HOME/.bashrc"
     info "Fastfetch adicionado ao .bashrc"
 fi
+if ! grep -q 'clear()' "$HOME/.bashrc"; then
+    echo 'clear() { command clear; fastfetch; }' >> "$HOME/.bashrc"
+fi
+
+# Adiciona fastfetch + clear override ao .zshrc
+touch "$HOME/.zshrc"
+if ! grep -q 'fastfetch' "$HOME/.zshrc"; then
+    echo 'fastfetch' >> "$HOME/.zshrc"
+    info "Fastfetch adicionado ao .zshrc"
+fi
+if ! grep -q 'clear()' "$HOME/.zshrc"; then
+    echo 'clear() { command clear; fastfetch; }' >> "$HOME/.zshrc"
+fi
+
 success "Fastfetch configurado"
 
 # ── 9. Plymouth ───────────────────────────────────────────────────────────────
@@ -478,6 +493,7 @@ ${GR}  ✓${R}  Cursor: Catppuccin Mocha Dark
 ${GR}  ✓${R}  Kitty configurado
 ${GR}  ✓${R}  Starship prompt
 ${GR}  ✓${R}  Fastfetch + ASCII art
+${GR}  ✓${R}  clear → volta ao fastfetch
 ${GR}  ✓${R}  Plymouth boot theme
 ${GR}  ✓${R}  GRUB theme Catppuccin
 "
