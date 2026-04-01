@@ -15,6 +15,7 @@
 # ║   • Plymouth: tema Catppuccin boot                           ║
 # ║   • GRUB: tema Catppuccin                                    ║
 # ║   • clear → volta ao fastfetch                               ║
+# ║   • GDM: tela de login Catppuccin                            ║
 # ║   • Aplicar temas via gsettings                              ║
 # ║                                                              ║
 # ║   Uso: bash rice-install.sh                                  ║
@@ -48,7 +49,7 @@ ${DM}  Ubuntu GNOME · bezerraluiz${R}
 "
 
 # ── 1. Dependências ───────────────────────────────────────────────────────────
-section "1/10 · Dependências"
+section "1/11 · Dependências"
 
 sudo apt-get update -qq
 sudo apt-get install -y \
@@ -66,7 +67,7 @@ sudo apt-get install -y \
 success "Dependências instaladas"
 
 # ── 2. Fonte: JetBrainsMono Nerd Font ─────────────────────────────────────────
-section "2/10 · JetBrainsMono Nerd Font"
+section "2/11 · JetBrainsMono Nerd Font"
 
 FONT_DIR="$HOME/.local/share/fonts"
 mkdir -p "$FONT_DIR"
@@ -86,7 +87,7 @@ else
 fi
 
 # ── 3. GTK Theme: Catppuccin Mocha Sapphire ───────────────────────────────────
-section "3/10 · GTK Theme: Catppuccin Mocha Sapphire"
+section "3/11 · GTK Theme: Catppuccin Mocha Sapphire"
 
 THEME_DIR="$HOME/.themes"
 mkdir -p "$THEME_DIR"
@@ -104,7 +105,7 @@ else
 fi
 
 # ── 4. Ícones: Papirus-Dark + Catppuccin folders ──────────────────────────────
-section "4/10 · Ícones Papirus + pastas Catppuccin"
+section "4/11 · Ícones Papirus + pastas Catppuccin"
 
 if dpkg -l papirus-icon-theme &>/dev/null; then
     success "Papirus já instalado"
@@ -126,7 +127,7 @@ rm -f papirus-folders-catppuccin.sh
 success "Papirus-Dark com pastas azuis configurado"
 
 # ── 5. Cursor: Catppuccin Mocha Dark ─────────────────────────────────────────
-section "5/10 · Cursor Catppuccin"
+section "5/11 · Cursor Catppuccin"
 
 CURSOR_DIR="$HOME/.local/share/icons"
 mkdir -p "$CURSOR_DIR"
@@ -144,7 +145,7 @@ else
 fi
 
 # ── 6. Kitty config ───────────────────────────────────────────────────────────
-section "6/10 · Kitty Terminal"
+section "6/11 · Kitty Terminal"
 
 mkdir -p "$HOME/.config/kitty"
 cat > "$HOME/.config/kitty/kitty.conf" << 'KITTY'
@@ -186,7 +187,7 @@ KITTY
 success "Kitty configurado"
 
 # ── 7. Starship prompt ────────────────────────────────────────────────────────
-section "7/10 · Starship Prompt"
+section "7/11 · Starship Prompt"
 
 if ! command -v starship &>/dev/null; then
     info "Instalando Starship..."
@@ -259,7 +260,7 @@ fi
 success "Starship configurado"
 
 # ── 8. Fastfetch + ASCII art ──────────────────────────────────────────────────
-section "8/10 · Fastfetch + ASCII art"
+section "8/11 · Fastfetch + ASCII art"
 
 mkdir -p "$HOME/.config/fastfetch"
 
@@ -369,7 +370,7 @@ fi
 success "Fastfetch configurado"
 
 # ── 9. Plymouth ───────────────────────────────────────────────────────────────
-section "9/10 · Plymouth (tela de boot)"
+section "9/11 · Plymouth (tela de boot)"
 
 sudo apt-get install -y plymouth plymouth-themes > /dev/null 2>&1
 
@@ -437,7 +438,7 @@ fi
 success "Plymouth configurado"
 
 # ── 10. GRUB Theme ────────────────────────────────────────────────────────────
-section "10/10 · GRUB Theme Catppuccin"
+section "10/11 · GRUB Theme Catppuccin"
 
 GRUB_THEME_DIR="/boot/grub/themes"
 GRUB_THEME_NAME="catppuccin-mocha-grub-theme"
@@ -468,6 +469,143 @@ if [ -d "$GRUB_THEME_DIR/$GRUB_THEME_NAME" ]; then
     success "GRUB theme Catppuccin ativado"
 fi
 
+# ── 11. GDM Login Screen ──────────────────────────────────────────────────────
+section "11/11 · GDM Login Screen (Catppuccin)"
+
+# Gera background SVG com gradiente Catppuccin
+python3 - << 'PYEOF'
+svg = """\
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080">
+  <defs>
+    <radialGradient id="rg" cx="30%" cy="30%" r="80%">
+      <stop offset="0%"   stop-color="#24273a"/>
+      <stop offset="100%" stop-color="#1e1e2e"/>
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#rg)"/>
+  <circle cx="300"  cy="250"  r="380" fill="#89b4fa" opacity="0.04"/>
+  <circle cx="1650" cy="850"  r="420" fill="#74c7ec" opacity="0.04"/>
+  <circle cx="960"  cy="980"  r="220" fill="#cba6f7" opacity="0.025"/>
+</svg>"""
+with open("/tmp/catppuccin-gdm-bg.svg", "w") as f:
+    f.write(svg)
+print("  ✓  Background SVG gerado")
+PYEOF
+
+sudo mkdir -p /usr/share/backgrounds/catppuccin
+sudo cp /tmp/catppuccin-gdm-bg.svg /usr/share/backgrounds/catppuccin/mocha-dark.svg
+
+# Configura GDM via dconf (background + cursor + fonte)
+sudo mkdir -p /etc/dconf/db/gdm.d /etc/dconf/profile
+
+if [ ! -f /etc/dconf/profile/gdm ]; then
+    sudo tee /etc/dconf/profile/gdm > /dev/null << 'EOF'
+user-db:user
+system-db:gdm
+EOF
+fi
+
+sudo tee /etc/dconf/db/gdm.d/01-catppuccin-mocha > /dev/null << 'EOF'
+[org/gnome/desktop/background]
+picture-uri='file:///usr/share/backgrounds/catppuccin/mocha-dark.svg'
+picture-uri-dark='file:///usr/share/backgrounds/catppuccin/mocha-dark.svg'
+primary-color='#1e1e2e'
+color-shading-type='solid'
+picture-options='zoom'
+
+[org/gnome/desktop/interface]
+cursor-theme='catppuccin-mocha-dark-cursors'
+font-name='JetBrainsMono Nerd Font 11'
+color-scheme='prefer-dark'
+EOF
+
+sudo dconf update 2>/dev/null || catch "GDM dconf update"
+success "GDM background e cursor configurados"
+
+# Patch CSS no gresource do gnome-shell (diálogo de login)
+info "Aplicando CSS Catppuccin no diálogo de login..."
+GRES="/usr/share/gnome-shell/gnome-shell-theme.gresource"
+WORKDIR="/tmp/gdm-catppuccin-theme"
+rm -rf "$WORKDIR" && mkdir -p "$WORKDIR/theme"
+
+PREFIX=$(gresource list "$GRES" 2>/dev/null | head -1 | sed 's|/[^/]*$||')
+
+if [ -n "$PREFIX" ]; then
+    cd "$WORKDIR"
+
+    # Extrai todos os recursos
+    for res in $(gresource list "$GRES" 2>/dev/null); do
+        fname="theme/${res#${PREFIX}/}"
+        mkdir -p "$(dirname "$fname")"
+        gresource extract "$GRES" "$res" > "$fname" 2>/dev/null || true
+    done
+
+    CSS_FILE="$WORKDIR/theme/gnome-shell.css"
+    if [ -f "$CSS_FILE" ]; then
+        cat > /tmp/catppuccin-gdm-patch.css << 'CSS'
+/* === Catppuccin Mocha — GDM Login Dialog === */
+#lockDialogGroup {
+  background-color: transparent;
+}
+.login-dialog {
+  background-color: rgba(30, 30, 46, 0.92);
+  border-radius: 16px;
+  border: 1px solid rgba(137, 180, 250, 0.20);
+  color: #cdd6f4;
+}
+.login-dialog StLabel.prompt-label,
+.login-dialog StLabel { color: #cdd6f4; }
+.login-dialog StEntry,
+.login-dialog StPasswordEntry {
+  background-color: #313244;
+  color: #cdd6f4;
+  border: 1px solid rgba(137, 180, 250, 0.40);
+  border-radius: 8px;
+}
+.login-dialog .login-button,
+.login-dialog StButton {
+  background-color: #89b4fa;
+  color: #1e1e2e;
+  border-radius: 8px;
+  font-weight: bold;
+}
+.login-dialog .login-button:hover,
+.login-dialog StButton:hover { background-color: #74c7ec; }
+/* === end Catppuccin === */
+CSS
+        cat /tmp/catppuccin-gdm-patch.css "$CSS_FILE" > /tmp/gnome-shell-patched.css
+        mv /tmp/gnome-shell-patched.css "$CSS_FILE"
+
+        # Gera XML do gresource
+        {
+            echo '<?xml version="1.0" encoding="UTF-8"?>'
+            echo '<gresources>'
+            echo "  <gresource prefix=\"$PREFIX\">"
+            find "$WORKDIR/theme" -type f | sort | while read -r f; do
+                echo "    <file>${f#$WORKDIR/theme/}</file>"
+            done
+            echo '  </gresource>'
+            echo '</gresources>'
+        } > "$WORKDIR/theme.gresource.xml"
+
+        if glib-compile-resources \
+                --sourcedir="$WORKDIR/theme" \
+                "$WORKDIR/theme.gresource.xml" \
+                --target="$WORKDIR/gnome-shell-theme.gresource" 2>/dev/null; then
+            sudo cp "$GRES" "${GRES}.bak"
+            sudo cp "$WORKDIR/gnome-shell-theme.gresource" "$GRES"
+            success "CSS do diálogo de login aplicado"
+        else
+            warn "Compilação gresource falhou — background ainda foi aplicado"
+            catch "GDM CSS gresource"
+        fi
+    else
+        catch "GDM CSS: gnome-shell.css não encontrado"
+    fi
+else
+    catch "GDM gresource não encontrado"
+fi
+
 # ── Aplicar temas via gsettings ───────────────────────────────────────────────
 section "Aplicando temas via gsettings"
 
@@ -496,6 +634,7 @@ ${GR}  ✓${R}  Fastfetch + ASCII art
 ${GR}  ✓${R}  clear → volta ao fastfetch
 ${GR}  ✓${R}  Plymouth boot theme
 ${GR}  ✓${R}  GRUB theme Catppuccin
+${GR}  ✓${R}  GDM login screen Catppuccin
 "
 
 if [ ${#ERRORS[@]} -gt 0 ]; then
